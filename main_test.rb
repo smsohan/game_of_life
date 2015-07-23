@@ -231,11 +231,14 @@ class UniverseProjector
 end
 
 
-universe = Universe.new(3,3)
+universe = Universe.new(4, 4)
 universe.alive(0, 0)
 universe.alive(0, 1)
 universe.alive(1, 1)
 universe.alive(2, 2)
+universe.alive(3, 0)
+universe.alive(4, 2)
+universe.alive(4, 3)
 
 UniverseProjector.new(universe).time_travel
 
