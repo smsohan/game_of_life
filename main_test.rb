@@ -42,32 +42,41 @@ class Universe
     @lives = new_generation
   end
 
+  def each_row
+    @lives.each {|row| yield row}
+  end
+
+  def dead?
+    @lives.flatten.none?{|x| x == ALIVE}
+  end
+
   private
 
   def updated_state(row, column)
-    neighbours = neighbours(row, column)
 
-    new_state = @lives[row][column]
-    live_neighbours = neighbours.select{|nrow, ncolumn| alive?(nrow, ncolumn)}
+    live_neighbours = live_neighbours(row, column)
 
     if alive?(row, column)
       if live_neighbours.size < 2 || live_neighbours.size > 3
-        new_state = DEAD
-      else
-        new_state = ALIVE
+        return DEAD
       end
-    elsif live_neighbours.size == 3
-      new_state = ALIVE
+
+      return ALIVE
     end
 
+    if live_neighbours.size == 3
+      return ALIVE
+    end
 
-    new_state
+    return @lives[row][column]
   end
 
-  def neighbours(row, column)
-    [row, row-1, row+1].product([column, column-1, column + 1]) - [[row, column]]
+  def live_neighbours(row, column)
+    neighbours = [row, row-1, row+1].product([column, column-1, column + 1]) - [[row, column]]
+    neighbours.select{|nrow, ncolumn| alive?(nrow, ncolumn)}
   end
 end
+
 
 describe Universe do
   before do
@@ -197,6 +206,36 @@ describe Universe do
 
   end
 
+end
 
+class UniverseProjector
+
+  def initialize(universe)
+    @universe = universe
+  end
+
+  def time_travel
+    until @universe.dead?
+      @universe.tick
+      render
+      puts
+    end
+  end
+
+  def render
+    @universe.each_row do |row|
+      puts row.join ' '
+    end
+  end
 
 end
+
+
+universe = Universe.new(3,3)
+universe.alive(0, 0)
+universe.alive(0, 1)
+universe.alive(1, 1)
+universe.alive(2, 2)
+
+UniverseProjector.new(universe).time_travel
+
